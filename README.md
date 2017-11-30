@@ -6,11 +6,15 @@ Show tabular stock data pulled from google finance
 
 # installing alpha_vantage
     pip install alpha_vantage
+
 # Running the script :
     python stockshow.py -f <filename>
     python stockshow.py -l <list of company stock codes>
 
     Press F1 to quit the window
+# Example
+    stockshow python stockshow.py -l AAPL GOOGL NFLX TSLA
+    ![output format](https://github.com/yahskakn/stockshow/blob/master/output.png)
 
 # Alpha vantage
     Google seemed to be performing slow and also kicked me out of using their service as I was sending 5 requests a second. 
