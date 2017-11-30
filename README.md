@@ -14,7 +14,7 @@ Show tabular stock data pulled from google finance
     Press F1 to quit the window
 # Example
     stockshow python stockshow.py -l AAPL GOOGL NFLX TSLA
-    ![alt text](https://github.com/yahskakn/stockshow/blob/master/output.png)
+    ![output format](output.png)
 
 # Alpha vantage
     Google seemed to be performing slow and also kicked me out of using their service as I was sending 5 requests a second. 
