@@ -4,6 +4,8 @@ Show tabular stock data pulled from google finance
 # installing prettytable:
     sudo easy_install prettytable
 
+# installing alpha_vantage
+    pip install alpha_vantage
 # Running the script :
     python stockshow.py -f <filename>
     python stockshow.py -l <list of company stock codes>
