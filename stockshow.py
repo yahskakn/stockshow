@@ -9,19 +9,17 @@ import prettytable
 import os.path
 #import sys
 import argparse
-import pdb
 import time
 import datetime
 from alpha_vantage.timeseries import TimeSeries
 
 #Sleep time in seconds
 SLEEP_TIME = 1.7
-API_KEY = ' '
+API_KEY = ''
 
 ts = TimeSeries(key=API_KEY)
-now = datetime.datetime.now()
-date = now.strftime("%Y-%m-%d")
 source = 'GOOGLE'
+snapshot_file = "snapshot.txt"
 
 def getCompanyList(args):
     if args.file is not None:
@@ -47,7 +45,7 @@ def parseArgs():
     parser.add_argument('-l', '--list', nargs='+', help='provide list of stock symbols on the terminal')
     return parser.parse_args()
 
-def getAlphaData(fin_data):
+def getAlphaData(fin_data, date):
     cl = fin_data[date]['4. close']
     op = fin_data[date]['1. open']
     ch = float(cl) - float(op)
@@ -62,6 +60,8 @@ def getTable():
     if company_list:
         tbl = prettytable.PrettyTable(["Company", "Last Price", "Opening", "Change(%)"])
 
+    now = datetime.datetime.now()
+    date = now.strftime("%Y-%m-%d")
     #iterate through list and get stock data
     for company in company_list:
         if source == 'GOOGLE':
@@ -74,20 +74,31 @@ def getTable():
                     tbl.add_row([fin_data['name'], fin_data['l'], fin_data['op'], str(fin_data['c']+'('+fin_data['cp']+')')])
         elif source == 'ALPHA':
             fin_data, _ = ts.get_daily(company, outputsize='compact')
-            cl, op, ch, chp = getAlphaData(fin_data)
+            cl, op, ch, chp = getAlphaData(fin_data, date)
             tbl.add_row([company, cl, op, str(ch+'('+chp+')')])
 
-    return str(tbl)
+    tbl = str(tbl) + '\n Last Updated : '+str(now.strftime("%Y-%m-%d %H:%M:%S"))
+    return tbl
+
+def writeTableToFile(tbl):
+    with open(snapshot_file, "w") as text_file:
+        text_file.write(tbl)
 
 def main(stdscr):
     win = curses.initscr()
     win.nodelay(1)
+    if os.path.exists(snapshot_file):
+        with open(snapshot_file) as text_file:
+            win.addstr(text_file.read())
     while(True):
         if (win.getch() == curses.KEY_F1):
+            if (tbl):
+                writeTableToFile(tbl)
             curses.endwin()
             return
         win.clear()
-        win.addstr(getTable())
+        tbl = getTable()
+        win.addstr(tbl)
         win.refresh()
         time.sleep(SLEEP_TIME)
 
