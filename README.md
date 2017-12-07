@@ -13,7 +13,7 @@ Show tabular stock data pulled from google finance
 
     Press F1 to quit the window
 # Example
-    stockshow python stockshow.py -l AAPL GOOGL NFLX TSLA
+    python stockshow.py -l AAPL GOOGL NFLX TSLA
 
 ![alt text](https://github.com/yahskakn/stockshow/blob/master/output.png)
 
@@ -23,3 +23,8 @@ Show tabular stock data pulled from google finance
     but if you want to try ALPHA Vantage change the source global var to 'ALPHA' and also get an api key from https://www.alphavantage.co/support/#api-key
     Also changing the sleep time to 1.7 seconds to see if google is okay with that refresh rate and also to abide by alpha vantage's limit of requests
 
+# Snapshot
+When I run the script and if I am requesting a lot of companies' stock details, I am presented with a blank screen until all that data is fetched.
+Instead I now save the data fetched in previous run (the last update helps here) and refresh data once I get it.
+The problem though is that the previous run could've been for a different company and if I request for a different company this time, the output is confusing.
+Caching a local copy of all previously searched companies is nice, but won't scale well. What's a good solution here?
