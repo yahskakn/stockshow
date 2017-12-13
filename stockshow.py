@@ -14,12 +14,13 @@ import datetime
 from alpha_vantage.timeseries import TimeSeries
 
 #Sleep time in seconds
-SLEEP_TIME = 1.7
+SLEEP_TIME = 10
 API_KEY = ''
 
 ts = TimeSeries(key=API_KEY)
 source = 'GOOGLE'
 snapshot_file = "snapshot.txt"
+cryptoList = ['BTC', 'ETH', 'LTC']
 
 def getCompanyList(args):
     if args.file is not None:
@@ -52,6 +53,9 @@ def getAlphaData(fin_data, date):
     chp = (ch / float(op) ) * 100
     return str(cl), str(op), str(ch), str(round(chp,2))
 
+def constructChangeString(change, changepct):
+    return str(str(change)+'('+str(changepct)+')')
+
 def getTable():
     args = parseArgs()
 
@@ -64,18 +68,25 @@ def getTable():
     date = now.strftime("%Y-%m-%d")
     #iterate through list and get stock data
     for company in company_list:
-        if source == 'GOOGLE':
+        if company in cryptoList:
+            request = 'https://min-api.cryptocompare.com/data/pricemultifull?fsyms='+company+'&tsyms=USD'
+            rsp = requests.get(request)
+
+            if rsp.status_code in (200,0):
+                cc_data = json.loads(rsp.content)['RAW'][company]['USD']
+                tbl.add_row([company, cc_data['PRICE'], cc_data['OPENDAY'], constructChangeString(cc_data['CHANGE24HOUR'], round(cc_data['CHANGEPCT24HOUR'],2))])
+        elif source == 'GOOGLE':
             request = 'https://finance.google.com/finance?q='+company+'&output=json'
             rsp = requests.get(request)
 
             if rsp.status_code in (200,0):
                 if "iid" in rsp.content:
                     fin_data = json.loads(rsp.content[6:-2].decode('unicode_escape'))
-                    tbl.add_row([fin_data['name'], fin_data['l'], fin_data['op'], str(fin_data['c']+'('+fin_data['cp']+')')])
+                    tbl.add_row([fin_data['name'], fin_data['l'], fin_data['op'], constructChangeString(fin_data['c'], fin_data['cp'])])
         elif source == 'ALPHA':
             fin_data, _ = ts.get_daily(company, outputsize='compact')
             cl, op, ch, chp = getAlphaData(fin_data, date)
-            tbl.add_row([company, cl, op, str(ch+'('+chp+')')])
+            tbl.add_row([company, cl, op, constructChangeString(ch, chp)])
 
     tbl = str(tbl) + '\n Last Updated : '+str(now.strftime("%Y-%m-%d %H:%M:%S"))
     return tbl
