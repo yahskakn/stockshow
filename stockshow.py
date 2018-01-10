@@ -101,16 +101,18 @@ def main(stdscr):
     if os.path.exists(snapshot_file):
         with open(snapshot_file) as text_file:
             win.addstr(text_file.read())
+            win.refresh()
     while(True):
-        if (win.getch() == curses.KEY_F1):
-            if (tbl):
-                writeTableToFile(tbl)
-            curses.endwin()
-            return
         win.clear()
         tbl = getTable()
         win.addstr(tbl)
         win.refresh()
-        time.sleep(SLEEP_TIME)
+        for i in range(int(SLEEP_TIME/0.1)):
+            if (win.getch() == curses.KEY_F1):
+                if (tbl):
+                    writeTableToFile(tbl)
+                curses.endwin()
+                return
+            time.sleep(0.1)
 
 wrapper(main)
